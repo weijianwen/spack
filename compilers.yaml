@@ -71,6 +71,19 @@ compilers:
     modules: []
     operating_system: centos7
     paths:
+      cc:  /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-uc6sbumioobdbkw4rwfyn2givi4nyvwq/bin/gcc
+      cxx: /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-uc6sbumioobdbkw4rwfyn2givi4nyvwq/bin/g++
+      f77: /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-uc6sbumioobdbkw4rwfyn2givi4nyvwq/bin/gfortran
+      fc:  /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-uc6sbumioobdbkw4rwfyn2givi4nyvwq/bin/gfortran
+    spec: gcc@8.2.0
+    target: x86_64
+- compiler:
+    environment: {}
+    extra_rpaths: []
+    flags: {}
+    modules: []
+    operating_system: centos7
+    paths:
       cc: /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/intel-parallel-studio-cluster.2017.5-geurbg7kvebddctqiaqjqjoy2hzp45k5/bin/icc
       cxx: /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/intel-parallel-studio-cluster.2017.5-geurbg7kvebddctqiaqjqjoy2hzp45k5/bin/icpc
       f77: /lustre/spack/tools/linux-centos7-x86_64/gcc-4.8.5/intel-parallel-studio-cluster.2017.5-geurbg7kvebddctqiaqjqjoy2hzp45k5/bin/ifort
