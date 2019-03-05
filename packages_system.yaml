@@ -63,10 +63,10 @@ packages:
         binutils@2.25.1 arch=linux-centos7-x86_64: /usr
       buildable: False 
     slurm:
-        paths:
-            slurm@system: /usr
-        buildable: False
+      paths:
+         slurm@system: /usr
+      buildable: False
     rdma-core:
-        paths:
-            rdmaa-core@system: /usr
-        buildable: False
+      paths:
+        rdma-core@system: /usr
+      buildable: False
