@@ -30,43 +30,13 @@ packages:
       version: [cluster]
     python:
       variants: +ucs4
-    autoconf:
+    cmake:
       paths:
-        autoconf@2.69 arch=linux-centos7-x86_64: /usr
-      buildable: False
-    automake:
+        cmake@3.13.4 arch=linux-centos7-x86_64: /usr
+    openssl:
       paths:
-        automake@1.13.4 arch=linux-centos7-x86_64: /usr
-      buildable: False
-    bison:
-      paths:
-        bison@3.0 arch=linux-centos7-x86_64: /usr
-        bison@2.7 arch=linux-centos7-x86_64: /usr
-      buildable: False
-    # cmake:
-    #   paths:
-    #     cmake@2.8.12.2 arch=linux-centos7-x86_64: /usr
-    flex:
-      paths:
-        flex@2.5.37 arch=linux-centos7-x86_64: /usr
-        buildable: False
-    libtool:
-      paths:
-        libtool@2.4.2 arch=linux-centos7-x86_64: /usr
-      buildable: False
-    m4:
-      paths:
-        m4@1.4.16 arch=linux-centos7-x86_64: /usr
-      buildable: False 
-    binutils:
-      paths:
-        binutils@2.25.1 arch=linux-centos7-x86_64: /usr
-      buildable: False 
+        openssl@1.0.2k: /usr
     slurm:
       paths:
-         slurm@system: /usr
-      buildable: False
-    rdma-core:
-      paths:
-        rdma-core@system: /usr
+         slurm@17-11-9-2: /usr
       buildable: False
