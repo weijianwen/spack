@@ -91,8 +91,7 @@ if [[ $2 == "--install" ]]; then
     ./build_${1}.sh PLATFORM
 fi
 
-# Sync cached source packages to the HTTP servers
-if [[ $2 == "--sync" ]]; then
-    echo "Sync cached packages to mirror site..."
+# Sync source package if I am the rpm user
+if [ "$(whoami)" == "rpm" ] ; then
     rsync -ar --progress --exclude=cudnn ${SPACK_ROOT}/var/spack/cache/ root@lb://var/lib/www/spack.pi.sjtu.edu.cn/mirror/
 fi
