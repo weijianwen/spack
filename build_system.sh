@@ -11,7 +11,6 @@ JDK18 = "jdk@1.8.0_202"
 for pkg in ["intel-parallel-studio@cluster.2016.4+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
             "intel-parallel-studio@cluster.2017.7+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
             "intel-parallel-studio@cluster.2018.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
-            "intel-parallel-studio@cluster.2019.2+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
             "intel-parallel-studio@cluster.2019.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48)
 ]:
     os.system("rm -rf $HOME/spack/etc/spack/licenses/intel/license.lic")
@@ -22,7 +21,6 @@ for pkg in ["intel-parallel-studio@cluster.2016.4+advisor+clck+daal+inspector+ip
 for pkg in ["intel-parallel-studio@cluster.2016.4+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@16.0.4 threads=openmp",
             "intel-parallel-studio@cluster.2017.7+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@17.0.7 threads=openmp",
             "intel-parallel-studio@cluster.2018.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@18.0.3 threads=openmp",
-            "intel-parallel-studio@cluster.2019.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@19.0.2 threads=openmp",
             "intel-parallel-studio@cluster.2019.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@19.0.3 threads=openmp"
 ]:
     os.system("rm -rf $HOME/spack/etc/spack/licenses/intel/license.lic")
@@ -43,7 +41,7 @@ for pkg in ["miniconda2@4.5.4",
             "gcc~binutils@5.4.0",
             "gcc~binutils@6.4.0",
             "gcc~binutils@7.3.0",
-            "gcc~binutils@8.2.0",
+            "gcc~binutils@8.3.0",
             "pgi+nvidia+single~network@18.4",
             "cuda@9.0.176",
             "cuda@8.0.61",
@@ -62,8 +60,8 @@ for pkg in {}.items():
 # Build MPI libraries
 for pkg in ["openmpi@3.1.3+legacylaunchers+pmi~cuda %gcc@8.3.0 fabrics=verbs schedulers=slurm",
             "mvapich2@2.3~cuda %gcc@8.3.0 fabrics=mrail file_systems=lustre process_managers=slurm",
-            "openmpi@3.1.3+legacylaunchers+pmi~cuda %intel@19.0.2 fabrics=verbs schedulers=slurm",
-            "mvapich2@2.3~cuda %intel@19.0.2 fabrics=mrail file_systems=lustre process_managers=slurm"
+            "openmpi@3.1.3+legacylaunchers+pmi~cuda %intel@19.0.3 fabrics=verbs schedulers=slurm",
+            "mvapich2@2.3~cuda %intel@19.0.3 fabrics=mrail file_systems=lustre process_managers=slurm"
         # "mvapich2@2.3~cuda fabrics={} process_managers=slurm file_systems=lustre".format(MVFAB): "",
         # "mvapich2@2.3+cuda fabrics={} process_managers=slurm file_systems=lustre".format(MVFAB): "^cuda@8.0.61",
         # "mpich@3.2.1+pmi+hydra+romio+verbs": "",
