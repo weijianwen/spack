@@ -11,20 +11,22 @@ JDK18 = "jdk@1.8.0_202"
 for pkg in ["intel-parallel-studio@cluster.2016.4+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
             "intel-parallel-studio@cluster.2017.7+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
             "intel-parallel-studio@cluster.2018.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
-            "intel-parallel-studio@cluster.2019.2+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48)
+            "intel-parallel-studio@cluster.2019.2+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48),
+            "intel-parallel-studio@cluster.2019.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %{} threads=openmp".format(GCC48)
 ]:
-    os.system("rm -f $HOME/spack/etc/spack/licenses/intel/license.lic")
-    os.system("rm -f $HOME/intel")
+    os.system("rm -rf $HOME/spack/etc/spack/licenses/intel/license.lic")
+    os.system("rm -rf $HOME/intel")
     install(pkg)
 
 ## Build Intel Parallel Studio with %intel
 for pkg in ["intel-parallel-studio@cluster.2016.4+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@16.0.4 threads=openmp",
             "intel-parallel-studio@cluster.2017.7+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@17.0.7 threads=openmp",
             "intel-parallel-studio@cluster.2018.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@18.0.3 threads=openmp",
-            "intel-parallel-studio@cluster.2019.2+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@19.0.2 threads=openmp"
+            "intel-parallel-studio@cluster.2019.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@19.0.2 threads=openmp",
+            "intel-parallel-studio@cluster.2019.3+advisor+clck+daal+inspector+ipp+itac+mkl+mpi+tbb+vtune %intel@19.0.3 threads=openmp"
 ]:
-    os.system("rm -f $HOME/spack/etc/spack/licenses/intel/license.lic")
-    os.system("rm -f $HOME/intel")
+    os.system("rm -rf $HOME/spack/etc/spack/licenses/intel/license.lic")
+    os.system("rm -rf $HOME/intel")
     install(pkg)
 
 ## Install JDK with
