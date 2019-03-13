@@ -47,10 +47,8 @@ for pkg in ["miniconda2@4.5.4",
             "cuda@8.0.61",
             "cuda@7.5.18",
             "cuda@6.5.14",
-            "cudnn@7.0",
-            "cudnn@7.3",
-            "cudnn@6.0",
-            "cudnn@5.1"
+            "cudnn@7.3 ^cuda@9.0.176",
+            "cudnn@7.0 ^cuda@9.0.176",
 ]:
     install("{} %{}".format(pkg, GCC48))
 
