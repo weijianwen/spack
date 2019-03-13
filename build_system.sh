@@ -48,6 +48,7 @@ for pkg in ["miniconda2@4.5.4",
             "cuda@7.5.18",
             "cuda@6.5.14",
             "cudnn@7.0",
+            "cudnn@7.3",
             "cudnn@6.0",
             "cudnn@5.1"
 ]:
