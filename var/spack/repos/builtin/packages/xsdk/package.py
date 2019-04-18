@@ -30,7 +30,7 @@ class Xsdk(Package):
     variant('omega-h', default=True, description='Enable omega-h package build')
     variant('dealii', default=True, description='Enable dealii package build')
 
-    depends_on('hypre@develop~internal-superlu', when='@develop')
+    depends_on('hypre@develop~internal-superlu+superlu-dist+shared', when='@develop')
     depends_on('hypre@2.15.1~internal-superlu', when='@0.4.0')
     depends_on('hypre@2.12.1~internal-superlu', when='@0.3.0')
     depends_on('hypre@xsdk-0.2.0~internal-superlu', when='@xsdk-0.2.0')
@@ -86,8 +86,8 @@ class Xsdk(Package):
     depends_on('magma@2.4.0', when='@0.4.0 +cuda')
     depends_on('magma@2.2.0', when='@0.3.0 +cuda')
 
-    depends_on('amrex@develop', when='@develop %intel')
-    depends_on('amrex@develop', when='@develop %gcc')
+    depends_on('amrex@develop+sundials', when='@develop %intel')
+    depends_on('amrex@develop+sundials', when='@develop %gcc')
     depends_on('amrex@18.10.1', when='@0.4.0 %intel')
     depends_on('amrex@18.10.1', when='@0.4.0 %gcc')
 
