@@ -13,6 +13,7 @@ import spack.compiler
 import spack.compilers as compilers
 
 import spack.compilers.arm
+import spack.compilers.cce
 import spack.compilers.clang
 import spack.compilers.gcc
 import spack.compilers.intel
@@ -316,7 +317,13 @@ def test_nag_version_detection(version_str, expected_version):
     # Output on PowerPC
     ('pgcc 17.4-0 linuxpower target on Linuxpower\n'
      'PGI Compilers and Tools\n'
-     'Copyright (c) 2017, NVIDIA CORPORATION.  All rights reserved.\n', '17.4')
+     'Copyright (c) 2017, NVIDIA CORPORATION.  All rights reserved.\n',
+     '17.4'),
+    # Output when LLVM-enabled
+    ('pgcc-llvm 18.4-0 LLVM 64-bit target on x86-64 Linux -tp haswell\n'
+     'PGI Compilers and Tools\n'
+     'Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.\n',
+     '18.4')
 ])
 def test_pgi_version_detection(version_str, expected_version):
     version = spack.compilers.pgi.Pgi.extract_version_from_output(version_str)
@@ -338,4 +345,14 @@ def test_xl_version_detection(version_str, expected_version):
     assert version == expected_version
 
     version = spack.compilers.xl_r.XlR.extract_version_from_output(version_str)
+    assert version == expected_version
+
+
+@pytest.mark.parametrize('version_str,expected_version', [
+    ('Cray C : Version 8.4.6  Mon Apr 15, 2019  12:13:39\n', '8.4.6'),
+    ('Cray C++ : Version 8.4.6  Mon Apr 15, 2019  12:13:45\n', '8.4.6'),
+    ('Cray Fortran : Version 8.4.6  Mon Apr 15, 2019  12:13:55\n', '8.4.6')
+])
+def test_cce_version_detection(version_str, expected_version):
+    version = spack.compilers.cce.Cce.extract_version_from_output(version_str)
     assert version == expected_version
