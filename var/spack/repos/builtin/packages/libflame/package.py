@@ -20,6 +20,7 @@ class Libflame(AutotoolsPackage):
     git      = "https://github.com/flame/libflame.git"
 
     version('master', branch='master')
+    version('5.2.0', sha256='997c860f351a5c7aaed8deec00f502167599288fd0559c92d5bfd77d0b4d475c')
     version('5.1.0', sha256='e7189b750890bd781fe773f366b374518dd1d89a6513d3d6261bf549826384d1')
 
     provides('lapack', when='+lapack2flame')
@@ -50,6 +51,12 @@ class Libflame(AutotoolsPackage):
     # There is a known issue with the makefile :
     # https://groups.google.com/forum/#!topic/libflame-discuss/lQKEfjyudOY
     patch('Makefile_5.1.0.patch', when='@5.1.0')
+
+    def flag_handler(self, name, flags):
+        # -std=gnu99 at least required, old versions of GCC default to -std=c90
+        if self.spec.satisfies('%gcc@:5.1') and name == 'cflags':
+            flags.append('-std=gnu99')
+        return (flags, None, None)
 
     def configure_args(self):
         config_args = []
@@ -83,7 +90,6 @@ class Libflame(AutotoolsPackage):
             config_args.append("--disable-supermatrix")
 
         # https://github.com/flame/libflame/issues/21
-        if self.spec.satisfies('@5.1.99:'):
-            config_args.append("--enable-max-arg-list-hack")
+        config_args.append("--enable-max-arg-list-hack")
 
         return config_args
