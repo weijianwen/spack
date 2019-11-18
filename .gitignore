@@ -20,7 +20,7 @@
 *.swp
 /htmlcov
 .coverage
-#*
+\#*
 .#*
 lib/spack/spack/test/.cache
 /bin/spackc
@@ -30,3 +30,4 @@ lib/spack/spack/test/.cache
 mirror/
 *.in.log
 *.out.log
+*.orig

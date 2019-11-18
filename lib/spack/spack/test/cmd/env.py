@@ -17,6 +17,7 @@ import spack.environment as ev
 from spack.cmd.env import _env_create
 from spack.spec import Spec
 from spack.main import SpackCommand
+from spack.stage import stage_prefix
 
 from spack.spec_list import SpecListError
 from spack.test.conftest import MockPackage, MockPackageMultiRepo
@@ -217,21 +218,24 @@ def test_remove_command():
         assert 'mpileaks@' not in find('--show-concretized')
 
 
-def test_environment_status(capfd, tmpdir):
-    with capfd.disabled():
-        with tmpdir.as_cwd():
+def test_environment_status(capsys, tmpdir):
+    with tmpdir.as_cwd():
+        with capsys.disabled():
             assert 'No active environment' in env('status')
 
-            with ev.create('test'):
+        with ev.create('test'):
+            with capsys.disabled():
                 assert 'In environment test' in env('status')
 
-            with ev.Environment('local_dir'):
+        with ev.Environment('local_dir'):
+            with capsys.disabled():
                 assert os.path.join(os.getcwd(), 'local_dir') in env('status')
 
-                e = ev.Environment('myproject')
-                e.write()
-                with tmpdir.join('myproject').as_cwd():
-                    with e:
+            e = ev.Environment('myproject')
+            e.write()
+            with tmpdir.join('myproject').as_cwd():
+                with e:
+                    with capsys.disabled():
                         assert 'in current directory' in env('status')
 
 
@@ -576,7 +580,8 @@ def test_stage(mock_stage, mock_fetch, install_mockery):
     def check_stage(spec):
         spec = Spec(spec).concretized()
         for dep in spec.traverse():
-            stage_name = "%s-%s-%s" % (dep.name, dep.version, dep.dag_hash())
+            stage_name = "{0}{1}-{2}-{3}".format(stage_prefix, dep.name,
+                                                 dep.version, dep.dag_hash())
             assert os.path.isdir(os.path.join(root, stage_name))
 
     check_stage('mpileaks')
@@ -608,6 +613,17 @@ def test_env_blocks_uninstall(mock_stage, mock_fetch, install_mockery):
     out = uninstall('mpileaks', fail_on_error=False)
     assert uninstall.returncode == 1
     assert 'used by the following environments' in out
+
+
+def test_roots_display_with_variants():
+    env('create', 'test')
+    with ev.read('test'):
+        add('boost+shared')
+
+    with ev.read('test'):
+        out = find(output=str)
+
+    assert "boost +shared" in out
 
 
 def test_uninstall_removes_from_env(mock_stage, mock_fetch, install_mockery):
@@ -736,7 +752,7 @@ def test_indirect_build_dep():
         _env_create('test', with_view=False)
         e = ev.read('test')
         e.add(x_spec)
-        e.concretize(_display=False)
+        e.concretize()
         e.write()
 
         e_read = ev.read('test')
@@ -788,7 +804,7 @@ Dependency:
         e = ev.read('test')
         e.add(y_spec)
         e.add(x_spec)
-        e.concretize(_display=False)
+        e.concretize()
         e.write()
 
         e_read = ev.read('test')
@@ -965,6 +981,29 @@ env:
         assert Spec('callpath') in test.user_specs
 
 
+@pytest.mark.regression('12095')
+def test_stack_yaml_definitions_write_reference(tmpdir):
+    filename = str(tmpdir.join('spack.yaml'))
+    with open(filename, 'w') as f:
+        f.write("""\
+env:
+  definitions:
+    - packages: [mpileaks, callpath]
+    - indirect: [$packages]
+  specs:
+    - $packages
+""")
+    with tmpdir.as_cwd():
+        env('create', 'test', './spack.yaml')
+
+        with ev.read('test'):
+            concretize()
+        test = ev.read('test')
+
+        assert Spec('mpileaks') in test.user_specs
+        assert Spec('callpath') in test.user_specs
+
+
 def test_stack_yaml_add_to_list(tmpdir):
     filename = str(tmpdir.join('spack.yaml'))
     with open(filename, 'w') as f:
@@ -1114,6 +1153,33 @@ env:
             if user.name  == 'mpileaks':
                 assert (concrete.variants['shared'].value ==
                         user.variants['shared'].value)
+
+
+def test_stack_concretize_extraneous_variants_with_dash(tmpdir, config,
+                                                        mock_packages):
+    filename = str(tmpdir.join('spack.yaml'))
+    with open(filename, 'w') as f:
+        f.write("""\
+env:
+  definitions:
+    - packages: [libelf, mpileaks]
+    - install:
+        - matrix:
+            - [$packages]
+            - ['shared=False', '+shared-libs']
+  specs:
+    - $install
+""")
+    with tmpdir.as_cwd():
+        env('create', 'test', './spack.yaml')
+        with ev.read('test'):
+            concretize()
+
+        ev.read('test')
+
+        # Regression test for handling of variants with dashes in them
+        # will fail before this point if code regresses
+        assert True
 
 
 def test_stack_definition_extension(tmpdir):
@@ -1525,8 +1591,10 @@ env:
             install()
 
         shell = env('activate', '--sh', 'test')
+
         assert 'PATH' in shell
         assert os.path.join(viewdir, 'bin') in shell
+        assert 'FOOBAR=mpileaks' in shell
 
 
 def test_stack_view_no_activate_without_default(tmpdir, mock_fetch,
@@ -1644,3 +1712,75 @@ def test_env_activate_csh_prints_shell_output(
     assert "setenv SPACK_ENV" in out
     assert "set prompt=" in out
     assert "alias despacktivate" in out
+
+
+@pytest.mark.regression('12719')
+def test_env_activate_default_view_root_unconditional(env_deactivate,
+                                                      mutable_mock_env_path):
+    """Check that the root of the default view in the environment is added
+    to the shell unconditionally."""
+    env('create', 'test', add_view=True)
+
+    with ev.read('test') as e:
+        viewdir = e.default_view.root
+
+    out = env('activate', '--sh', 'test')
+    assert 'PATH=%s' % os.path.join(viewdir, 'bin') in out
+
+
+def test_concretize_user_specs_together():
+    e = ev.create('coconcretization')
+    e.concretization = 'together'
+
+    # Concretize a first time using 'mpich' as the MPI provider
+    e.add('mpileaks')
+    e.add('mpich')
+    e.concretize()
+
+    assert all('mpich' in spec for _, spec in e.concretized_specs())
+    assert all('mpich2' not in spec for _, spec in e.concretized_specs())
+
+    # Concretize a second time using 'mpich2' as the MPI provider
+    e.remove('mpich')
+    e.add('mpich2')
+    e.concretize()
+
+    assert all('mpich2' in spec for _, spec in e.concretized_specs())
+    assert all('mpich' not in spec for _, spec in e.concretized_specs())
+
+    # Concretize again without changing anything, check everything
+    # stays the same
+    e.concretize()
+
+    assert all('mpich2' in spec for _, spec in e.concretized_specs())
+    assert all('mpich' not in spec for _, spec in e.concretized_specs())
+
+
+def test_cant_install_single_spec_when_concretizing_together():
+    e = ev.create('coconcretization')
+    e.concretization = 'together'
+
+    with pytest.raises(ev.SpackEnvironmentError, match=r'cannot install'):
+        e.install('zlib')
+
+
+def test_duplicate_packages_raise_when_concretizing_together():
+    e = ev.create('coconcretization')
+    e.concretization = 'together'
+
+    e.add('mpileaks+opt')
+    e.add('mpileaks~opt')
+    e.add('mpich')
+
+    with pytest.raises(ev.SpackEnvironmentError, match=r'cannot contain more'):
+        e.concretize()
+
+
+def test_env_write_only_non_default():
+    print(env('create', 'test'))
+
+    e = ev.read('test')
+    with open(e.manifest_path, 'r') as f:
+        yaml = f.read()
+
+    assert yaml == ev.default_manifest_yaml
