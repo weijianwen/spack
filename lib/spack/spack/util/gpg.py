@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -100,8 +100,11 @@ class Gpg(object):
         cls.gpg()(*args)
 
     @classmethod
-    def verify(cls, signature, file):
-        cls.gpg()('--verify', signature, file)
+    def verify(cls, signature, file, suppress_warnings=False):
+        if suppress_warnings:
+            cls.gpg()('--verify', signature, file, error=str)
+        else:
+            cls.gpg()('--verify', signature, file)
 
     @classmethod
     def list(cls, trusted, signing):

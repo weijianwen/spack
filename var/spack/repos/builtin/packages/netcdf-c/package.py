@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -34,6 +34,7 @@ class NetcdfC(AutotoolsPackage):
         return url.format(version.dotted)
 
     version('master', branch='master')
+    version('4.7.3',   sha256='8e8c9f4ee15531debcf83788594744bd6553b8489c06a43485a15c93b4e0448b')
     version('4.7.2',   sha256='b751cc1f314ac8357df2e0a1bacf35a624df26fe90981d3ad3fa85a5bbd8989a')
     version('4.7.1',   sha256='5c537c585773e575a16b28c3973b9608a98fdc4cf7c42893aa5223024e0001fc')
     version('4.7.0',   sha256='a512d2b4828c6177dd4b96791c4163e4e06e6bfc7123bebfbfe01762d777d1cb')
@@ -55,6 +56,9 @@ class NetcdfC(AutotoolsPackage):
     # configure fails if curl is not installed.
     # See https://github.com/Unidata/netcdf-c/issues/1390
     patch('https://github.com/Unidata/netcdf-c/commit/e5315da1e748dc541d50796fb05233da65e86b6b.patch', sha256='10a1c3f7fa05e2c82457482e272bbe04d66d0047b237ad0a73e87d63d848b16c', when='@4.7.0')
+    # fix headers
+    patch('https://github.com/Unidata/netcdf-c/pull/1505.patch', sha256='f52db13c61b9c19aafe03c2a865163b540e9f6dee36e3a5f808f05fac59f2030', when='@4.7.2')
+    patch('https://github.com/Unidata/netcdf-c/pull/1508.patch', sha256='56532470875b9a97f3cf2a7d9ed16ef1612df3265ee38880c109428322ff3a40', when='@4.7.2')
 
     variant('mpi', default=True,
             description='Enable parallel I/O for netcdf-4')

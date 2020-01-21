@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -19,12 +19,13 @@ from llnl.util.tty.color import colorize
 from llnl.util.filesystem import working_dir
 
 import spack.config
+import spack.error
 import spack.extensions
 import spack.paths
 import spack.spec
 import spack.store
 import spack.util.spack_json as sjson
-from spack.error import SpackError
+import spack.util.string
 
 
 # cmd has a submodule called "list" so preserve the python list module
@@ -134,7 +135,9 @@ def parse_specs(args, **kwargs):
     tests = kwargs.get('tests', False)
 
     try:
-        sargs = args if isinstance(args, six.string_types) else ' '.join(args)
+        sargs = args
+        if not isinstance(args, six.string_types):
+            sargs = ' '.join(spack.util.string.quote(args))
         specs = spack.spec.parse(sargs)
         for spec in specs:
             if concretize:
@@ -147,15 +150,15 @@ def parse_specs(args, **kwargs):
     except spack.spec.SpecParseError as e:
         msg = e.message + "\n" + str(e.string) + "\n"
         msg += (e.pos + 2) * " " + "^"
-        raise SpackError(msg)
+        raise spack.error.SpackError(msg)
 
-    except spack.spec.SpecError as e:
+    except spack.error.SpecError as e:
 
         msg = e.message
         if e.long_message:
             msg += e.long_message
 
-        raise SpackError(msg)
+        raise spack.error.SpackError(msg)
 
 
 def elide_list(line_list, max_num=10):
@@ -209,6 +212,9 @@ def disambiguate_spec(spec, env, local=False, installed=True):
 
 
 def gray_hash(spec, length):
+    if not length:
+        # default to maximum hash length
+        length = 32
     h = spec.dag_hash(length) if spec.concrete else '-' * length
     return colorize('@K{%s}' % h)
 
@@ -328,7 +334,7 @@ def display_specs(specs, args=None, **kwargs):
 
     format_string = get_arg('format', None)
     if format_string is None:
-        nfmt = '{namespace}.{name}' if namespace else '{name}'
+        nfmt = '{fullname}' if namespace else '{name}'
         ffmt = ''
         if full_compiler or flags:
             ffmt += '{%compiler.name}'

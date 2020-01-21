@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -8,7 +8,7 @@ from spack import *
 
 
 class Chgcentre(CMakePackage):
-    """The chgcentre tool can be used 
+    """The chgcentre tool can be used
     to change the phase centre of a measurement set."""
 
     homepage = "https://sourceforge.net/p/wsclean/wiki/chgcentre/"
@@ -18,4 +18,3 @@ class Chgcentre(CMakePackage):
 
     depends_on('casacore')
     depends_on('gsl')
-

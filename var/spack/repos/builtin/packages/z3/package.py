@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -20,8 +20,12 @@ class Z3(MakefilePackage):
 
     phases = ['bootstrap', 'build', 'install']
 
-    variant('python', default=False, description='Enable python support')
-    depends_on('python', when='+python')
+    variant('python', default=False, description='Enable python binding')
+    depends_on('python', type=('build', 'run'))
+
+    # Referenced: https://github.com/Z3Prover/z3/issues/1016
+    patch('fix_1016_1.patch', when='@:4.4.1')
+    patch('fix_1016_2.patch', when='@4.5.0')
 
     build_directory = 'build'
 

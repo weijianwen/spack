@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -16,6 +16,8 @@ class Lbann(CMakePackage):
     homepage = "http://software.llnl.gov/lbann/"
     url      = "https://github.com/LLNL/lbann/archive/v0.91.tar.gz"
     git      = "https://github.com/LLNL/lbann.git"
+
+    maintainers = ['bvanessen']
 
     version('develop', branch='develop')
     version('0.99', branch='develop')
@@ -104,7 +106,7 @@ class Lbann(CMakePackage):
     depends_on('python@3: +shared', type=('build', 'run'), when='@:0.90,0.99:')
     extends("python")
     depends_on('py-setuptools', type='build')
-    depends_on('py-argparse', type='run', when='@:0.90,0.99:')
+    depends_on('py-argparse', type='run', when='@:0.90,0.99: ^python@:2.6')
     depends_on('py-configparser', type='run', when='@:0.90,0.99:')
     depends_on('py-graphviz@0.10.1:', type='run', when='@:0.90,0.99:')
     depends_on('py-matplotlib@3.0.0:', type='run', when='@:0.90,0.99:')

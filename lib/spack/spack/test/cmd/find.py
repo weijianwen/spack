@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -12,9 +12,12 @@ import spack.cmd.find
 from spack.main import SpackCommand
 from spack.spec import Spec
 from spack.util.pattern import Bunch
+import spack.environment as ev
 
 
 find = SpackCommand('find')
+env = SpackCommand('env')
+install = SpackCommand('install')
 
 base32_alphabet = 'abcdefghijklmnopqrstuvwxyz234567'
 
@@ -302,3 +305,16 @@ def test_find_no_sections(database, config):
 def test_find_command_basic_usage(database):
     output = find()
     assert 'mpileaks' in output
+
+
+@pytest.mark.regression('9875')
+def test_find_prefix_in_env(mutable_mock_env_path, install_mockery, mock_fetch,
+                            mock_packages, mock_archive, config):
+    """Test `find` formats requiring concrete specs work in environments."""
+    env('create', 'test')
+    with ev.read('test'):
+        install('mpileaks')
+        find('-p')
+        find('-l')
+        find('-L')
+        # Would throw error on regression

@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -26,8 +26,8 @@ class PyTheano(PythonPackage):
     depends_on('python@2.6:2.8,3.3:')
 
     depends_on('py-setuptools', type=('build', 'run'))
-    depends_on('py-scipy@0.11:', type=('build', 'run'))
-    depends_on('py-numpy@1.7.1:', type=('build', 'run'))
+    depends_on('py-numpy@1.9.1:', type=('build', 'run'))
+    depends_on('py-scipy@0.14:', type=('build', 'run'))
     depends_on('py-six@1.9.0:', type=('build', 'run'))
 
     depends_on('blas')
@@ -38,4 +38,5 @@ class PyTheano(PythonPackage):
     depends_on('libgpuarray', when='+gpu')
 
     depends_on('py-nose@1.3.0:', type='test')
-    depends_on('py-nose-parameterized@0.5.0:', type='test')
+    depends_on('py-parameterized', type='test')
+    depends_on('py-flake8', type='test')

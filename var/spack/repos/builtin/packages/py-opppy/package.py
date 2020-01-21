@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,7 +21,7 @@ class PyOpppy(PythonPackage):
     depends_on('py-setuptools', type=('build', 'run'))
     depends_on('py-numpy@1.6:', type=('build', 'run'))
     depends_on('python@3:',     type=('build', 'run'))
-    depends_on('py-argparse',   type=('build', 'run'))
+    depends_on('py-argparse',   type=('build', 'run'), when='^python@:2.6')
     depends_on('py-scipy',      type=('build', 'run'))
     depends_on('py-matplotlib', type=('build', 'run'))
     depends_on('py-sphinx',     type=('build', 'run'))

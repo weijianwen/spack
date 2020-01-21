@@ -1,4 +1,4 @@
-.. Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
    Spack Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -16,7 +16,7 @@ Prerequisites
 Spack has the following minimum requirements, which must be installed
 before Spack is run:
 
-#. Python 2 (2.6 or 2.7) or 3 (3.4 - 3.7) to run Spack
+#. Python 2 (2.6 or 2.7) or 3 (3.5 - 3.8) to run Spack
 #. A C/C++ compiler for building
 #. The ``make`` executable for building
 #. The ``git`` and ``curl`` commands for fetching

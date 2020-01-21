@@ -1,4 +1,4 @@
-# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,8 +21,10 @@ import six
 
 import ruamel.yaml.error as yaml_error
 
+from ordereddict_backport import OrderedDict
+
 try:
-    from collections.abc import Mapping
+    from collections.abc import Mapping  # novm
 except ImportError:
     from collections import Mapping
 
@@ -166,7 +168,7 @@ class MirrorCollection(Mapping):
     """A mapping of mirror names to mirrors."""
 
     def __init__(self, mirrors=None, scope=None):
-        self._mirrors = dict(
+        self._mirrors = OrderedDict(
             (name, Mirror.from_dict(mirror, name))
             for name, mirror in (
                 mirrors.items() if mirrors is not None else
@@ -178,6 +180,7 @@ class MirrorCollection(Mapping):
     def to_yaml(self, stream=None):
         return syaml.dump(self.to_dict(True), stream)
 
+    # TODO: this isn't called anywhere
     @staticmethod
     def from_yaml(stream, name=None):
         try:
@@ -303,8 +306,8 @@ def mirror_archive_paths(fetcher, per_package_ref, spec=None):
     storage path of the resource associated with the specified ``fetcher``."""
     ext = None
     if spec:
-        ext = spec.package.versions[spec.package.version].get(
-            'extension', None)
+        versions = spec.package.versions.get(spec.package.version, {})
+        ext = versions.get('extension', None)
     # If the spec does not explicitly specify an extension (the default case),
     # then try to determine it automatically. An extension can only be
     # specified for the primary source of the package (e.g. the source code
@@ -502,7 +505,6 @@ def add_single_spec(spec, mirror_root, mirror_stats):
             with spec.package.stage as pkg_stage:
                 pkg_stage.cache_mirror(mirror_stats)
                 for patch in spec.package.all_patches():
-                    patch.fetch(pkg_stage)
                     if patch.cache():
                         patch.cache().cache_mirror(mirror_stats)
                     patch.clean()
@@ -519,7 +521,7 @@ def add_single_spec(spec, mirror_root, mirror_stats):
         else:
             tty.warn(
                 "Error while fetching %s" % spec.cformat('{name}{@version}'),
-                exception.message)
+                getattr(exception, 'message', exception))
         mirror_stats.error()
 
 
