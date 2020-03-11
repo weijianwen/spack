@@ -31,3 +31,8 @@ mirror/
 *.in.log
 *.out.log
 *.orig
+
+# Eclipse files
+.project
+.cproject
+.pydevproject
