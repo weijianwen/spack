@@ -36,3 +36,6 @@ mirror/
 .project
 .cproject
 .pydevproject
+*.srctrlbm
+*.srctrldb
+*.srctrlprj
