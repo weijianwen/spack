@@ -1,46 +1,41 @@
-##############################################################################
-# Copyright (c) 2013-2017, Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
+# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
-# This file is part of Spack.
-# Created by Todd Gamblin, tgamblin@llnl.gov, All rights reserved.
-# LLNL-CODE-647188
-#
-# For details, see https://github.com/spack/spack
-# Please also see the NOTICE and LICENSE files for our notice and the LGPL.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License (as
-# published by the Free Software Foundation) version 2.1, February 1999.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
-# conditions of the GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-##############################################################################
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 from spack import *
 
 
 class GtkDoc(AutotoolsPackage):
-    """GTK-Doc is a project which was started to
-    generate API documentation from comments added to C code."""
+    """GtkDoc is a tool used to extract API documentation from
+    C-code like Doxygen, but handles documentation of GObject
+    (including signals and properties) that makes it very
+    suitable for GTK+ apps and libraries. It uses docbook for
+    intermediate files and can produce html by default and
+    pdf/man-pages with some extra work."""
 
-    homepage = "https://www.gtk.org/gtk-doc/"
-    url      = "https://download.gnome.org/sources/gtk-doc/1.27/gtk-doc-1.27.tar.xz"
+    homepage = "https://wiki.gnome.org/DocumentationProject/GtkDoc"
+    url = 'https://gitlab.gnome.org/GNOME/gtk-doc/-/archive/GTK_DOC_1_32/gtk-doc-GTK_DOC_1_32.tar.gz'
 
-    version('1.27', 'b29949e0964762e474b706ce22171602')
+    version('1.32', sha256='0890c1f00d4817279be51602e67c4805daf264092adc58f9c04338566e8225ba')
 
-    depends_on('python')
-    depends_on('py-six')
+    # Commented out until package dblatex has been created
+    # variant('pdf', default=False, description='Adds PDF support')
+
+    depends_on('autoconf', type='build')
+    depends_on('automake', type='build')
+    depends_on('libtool',  type='build')
+    depends_on('m4',       type='build')
+    depends_on('pkgconfig', type='build')
+
+    depends_on('python@3.2:', type=('build', 'run'))
+    depends_on('py-pygments', type=('build', 'run'))
     depends_on('libxslt')
     depends_on('libxml2')
-    depends_on('docbook-xml@4.3')
     depends_on('docbook-xsl')
+    # depends_on('dblatex', when='+pdf')
 
-    def configure_args(self):
-        spec = self.spec
-        return ['--with-xml-catalog=%s/catalog.xml' % spec['docbook-xml'].prefix]
+    def url_for_version(self, version):
+        """Handle gnome's version-based custom URLs."""
+        url = 'https://gitlab.gnome.org/GNOME/gtk-doc/-/archive/GTK_DOC_{0}/gtk-doc-GTK_DOC_{0}.tar.gz'
+        return url.format(version.underscored)

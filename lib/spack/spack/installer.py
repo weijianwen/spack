@@ -36,6 +36,7 @@ import six
 import sys
 import time
 
+import llnl.util.filesystem as fs
 import llnl.util.lock as lk
 import llnl.util.tty as tty
 import spack.binary_distribution as binary_distribution
@@ -43,14 +44,12 @@ import spack.compilers
 import spack.error
 import spack.hooks
 import spack.package
+import spack.package_prefs as prefs
 import spack.repo
 import spack.store
 
-from llnl.util.filesystem import \
-    chgrp, install, install_tree, mkdirp, touch, working_dir
-from llnl.util.tty.color import colorize, cwrite
+from llnl.util.tty.color import colorize
 from llnl.util.tty.log import log_output
-from spack.package_prefs import get_package_dir_permissions, get_package_group
 from spack.util.environment import dump_environment
 from spack.util.executable import which
 
@@ -133,21 +132,21 @@ def _do_fake_install(pkg):
     chmod = which('chmod')
 
     # Install fake command
-    mkdirp(pkg.prefix.bin)
-    touch(os.path.join(pkg.prefix.bin, command))
+    fs.mkdirp(pkg.prefix.bin)
+    fs.touch(os.path.join(pkg.prefix.bin, command))
     chmod('+x', os.path.join(pkg.prefix.bin, command))
 
     # Install fake header file
-    mkdirp(pkg.prefix.include)
-    touch(os.path.join(pkg.prefix.include, header + '.h'))
+    fs.mkdirp(pkg.prefix.include)
+    fs.touch(os.path.join(pkg.prefix.include, header + '.h'))
 
     # Install fake shared and static libraries
-    mkdirp(pkg.prefix.lib)
+    fs.mkdirp(pkg.prefix.lib)
     for suffix in [dso_suffix, '.a']:
-        touch(os.path.join(pkg.prefix.lib, library + suffix))
+        fs.touch(os.path.join(pkg.prefix.lib, library + suffix))
 
     # Install fake man page
-    mkdirp(pkg.prefix.man.man1)
+    fs.mkdirp(pkg.prefix.man.man1)
 
     packages_dir = spack.store.layout.build_packages_path(pkg.spec)
     dump_packages(pkg.spec, packages_dir)
@@ -254,8 +253,7 @@ def _print_installed_pkg(message):
     Args:
         message (str): message to be output
     """
-    cwrite('@*g{[+]} ')
-    print(message)
+    print(colorize('@*g{[+]} ') + message)
 
 
 def _process_external_package(pkg, explicit):
@@ -380,14 +378,14 @@ def dump_packages(spec, path):
     Dump all package information for a spec and its dependencies.
 
     This creates a package repository within path for every namespace in the
-    spec DAG, and fills the repos wtih package files and patch files for every
+    spec DAG, and fills the repos with package files and patch files for every
     node in the DAG.
 
     Args:
         spec (Spec): the Spack spec whose package information is to be dumped
         path (str): the path to the build packages directory
     """
-    mkdirp(path)
+    fs.mkdirp(path)
 
     # Copy in package.py files from any dependencies.
     # Note that we copy them in as they are in the *install* directory
@@ -428,7 +426,7 @@ def dump_packages(spec, path):
         if node is spec:
             spack.repo.path.dump_provenance(node, dest_pkg_dir)
         elif source_pkg_dir:
-            install_tree(source_pkg_dir, dest_pkg_dir)
+            fs.install_tree(source_pkg_dir, dest_pkg_dir)
 
 
 def install_msg(name, pid):
@@ -464,17 +462,17 @@ def log(pkg):
         tty.debug(e)
 
     # Archive the whole stdout + stderr for the package
-    install(pkg.log_path, pkg.install_log_path)
+    fs.install(pkg.log_path, pkg.install_log_path)
 
     # Archive the environment used for the build
-    install(pkg.env_path, pkg.install_env_path)
+    fs.install(pkg.env_path, pkg.install_env_path)
 
     if os.path.exists(pkg.configure_args_path):
         # Archive the args used for the build
-        install(pkg.configure_args_path, pkg.install_configure_args_path)
+        fs.install(pkg.configure_args_path, pkg.install_configure_args_path)
 
     # Finally, archive files that are specific to each package
-    with working_dir(pkg.stage.path):
+    with fs.working_dir(pkg.stage.path):
         errors = six.StringIO()
         target_dir = os.path.join(
             spack.store.layout.metadata_path(pkg.spec), 'archived-files')
@@ -496,8 +494,8 @@ def log(pkg):
                     target = os.path.join(target_dir, f)
                     # We must ensure that the directory exists before
                     # copying a file in
-                    mkdirp(os.path.dirname(target))
-                    install(f, target)
+                    fs.mkdirp(os.path.dirname(target))
+                    fs.install(f, target)
                 except Exception as e:
                     tty.debug(e)
 
@@ -508,7 +506,7 @@ def log(pkg):
 
         if errors.getvalue():
             error_file = os.path.join(target_dir, 'errors.txt')
-            mkdirp(target_dir)
+            fs.mkdirp(target_dir)
             with open(error_file, 'w') as err:
                 err.write(errors.getvalue())
             tty.warn('Errors occurred when archiving files.\n\t'
@@ -564,6 +562,8 @@ install_args_docstring = """
                 even with exceptions.
             restage (bool): Force spack to restage the package source.
             skip_patch (bool): Skip patch stage of build if True.
+            stop_before (InstallPhase): stop execution before this
+                installation phase (or None)
             stop_at (InstallPhase): last installation phase to be executed
                 (or None)
             tests (bool or list or set): False to run no tests, True to test
@@ -781,12 +781,20 @@ class PackageInstaller(object):
         Ensures the package being installed has a valid last phase before
         proceeding with the installation.
 
-        The ``stop_at`` argument is removed from the installation arguments.
+        The ``stop_before`` or ``stop_at`` arguments are removed from the
+        installation arguments.
 
         Args:
             kwargs:
+              ``stop_before``': stop before execution of this phase (or None)
               ``stop_at``': last installation phase to be executed (or None)
         """
+        self.pkg.stop_before_phase = kwargs.pop('stop_before', None)
+        if self.pkg.stop_before_phase is not None and \
+           self.pkg.stop_before_phase not in self.pkg.phases:
+            tty.die('\'{0}\' is not an allowed phase for package {1}'
+                    .format(self.pkg.stop_before_phase, self.pkg.name))
+
         self.pkg.last_phase = kwargs.pop('stop_at', None)
         if self.pkg.last_phase is not None and \
                 self.pkg.last_phase not in self.pkg.phases:
@@ -1074,10 +1082,10 @@ class PackageInstaller(object):
                                                   pkg.name, 'src')
                         tty.msg('{0} Copying source to {1}'
                                 .format(pre, src_target))
-                        install_tree(pkg.stage.source_path, src_target)
+                        fs.install_tree(pkg.stage.source_path, src_target)
 
                     # Do the real install in the source directory.
-                    with working_dir(pkg.stage.source_path):
+                    with fs.working_dir(pkg.stage.source_path):
                         # Save the build environment in a file before building.
                         dump_environment(pkg.env_path)
 
@@ -1289,20 +1297,20 @@ class PackageInstaller(object):
             spack.store.layout.create_install_directory(pkg.spec)
         else:
             # Set the proper group for the prefix
-            group = get_package_group(pkg.spec)
+            group = prefs.get_package_group(pkg.spec)
             if group:
-                chgrp(pkg.spec.prefix, group)
+                fs.chgrp(pkg.spec.prefix, group)
 
             # Set the proper permissions.
             # This has to be done after group because changing groups blows
             # away the sticky group bit on the directory
             mode = os.stat(pkg.spec.prefix).st_mode
-            perms = get_package_dir_permissions(pkg.spec)
+            perms = prefs.get_package_dir_permissions(pkg.spec)
             if mode != perms:
                 os.chmod(pkg.spec.prefix, perms)
 
             # Ensure the metadata path exists as well
-            mkdirp(spack.store.layout.metadata_path(pkg.spec), mode=perms)
+            fs.mkdirp(spack.store.layout.metadata_path(pkg.spec), mode=perms)
 
     def _update_failed(self, task, mark=False, exc=None):
         """
@@ -1468,6 +1476,12 @@ class PackageInstaller(object):
                 if lock is not None:
                     self._update_installed(task)
                     _print_installed_pkg(pkg.prefix)
+
+                    # It's an already installed compiler, add it to the config
+                    if task.compiler:
+                        spack.compilers.add_compilers_to_config(
+                            spack.compilers.find_compilers([pkg.spec.prefix]))
+
                 else:
                     # At this point we've failed to get a write or a read
                     # lock, which means another process has taken a write
@@ -1500,8 +1514,10 @@ class PackageInstaller(object):
                 self._update_installed(task)
 
                 # If we installed then we should keep the prefix
+                stop_before_phase = getattr(pkg, 'stop_before_phase', None)
                 last_phase = getattr(pkg, 'last_phase', None)
-                keep_prefix = last_phase is None or keep_prefix
+                keep_prefix = keep_prefix or \
+                    (stop_before_phase is None and last_phase is None)
 
             except spack.directory_layout.InstallDirectoryAlreadyExistsError:
                 tty.debug("Keeping existing install prefix in place.")

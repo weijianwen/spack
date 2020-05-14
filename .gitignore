@@ -22,6 +22,7 @@
 .coverage
 \#*
 .#*
+.cache
 lib/spack/spack/test/.cache
 /bin/spackc
 *.run
@@ -39,3 +40,5 @@ mirror/
 *.srctrlbm
 *.srctrldb
 *.srctrlprj
+.vscode
+.devcontainer
